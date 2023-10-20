@@ -18,6 +18,6 @@ public interface NoticiaRepository extends JpaRepository<Noticia, Long> {
 
     @Async
     @Query("select noti from Noticia noti" +
-            " where noti.title like :pTitle and noti.featured=true")
+            " where LOWER(noti.title) like :pTitle and noti.featured=true")
     List<Noticia> buscarNoticia(@Param("pTitle") String pTitle);
 }

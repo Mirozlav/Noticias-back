@@ -33,14 +33,10 @@ public class NoticiaController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "title") String order,
             @RequestParam(defaultValue = "true") boolean asc
-    ) {
+    ) throws Exception{
         Page<Noticia> noticias = noticiaService.getAll(PageRequest.of(page,size, Sort.by(order)));
-        try {
-            if(!asc)
-                noticias =noticiaService.getAll(PageRequest.of(page,size, Sort.by(order).descending()));
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        if(!asc)
+            noticias =noticiaService.getAll(PageRequest.of(page,size, Sort.by(order).descending()));
         return new ResponseEntity<>(noticias, HttpStatus.OK);
     }
 
@@ -50,33 +46,24 @@ public class NoticiaController {
                                          @RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size,
                                          @RequestParam(defaultValue = "title") String order,
-                                         @RequestParam(defaultValue = "true") boolean asc) {
-        List<NoticiaContract> contracts = new ArrayList<>();
-        Page<Noticia> noticias= noticiaService.buscarNoticia(pTitulo,PageRequest.of(page,size, Sort.by(order)));;
-        try {
+                                         @RequestParam(defaultValue = "true") boolean asc) throws Exception{
+        Page<Noticia> noticias= noticiaService.buscarNoticia(pTitulo,PageRequest.of(page,size, Sort.by(order)));
             if(!asc)
                 noticias = noticiaService.buscarNoticia(pTitulo,PageRequest.of(page,size, Sort.by(order).descending()));
-
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
         return new ResponseEntity<>(noticias, HttpStatus.OK);
     }
 
     @Operation(summary = "agregar noticias",description = "agregar noticias")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> create(@RequestBody NoticiaContract contrato) {
-        try {
+    public ResponseEntity<?> create(@RequestBody NoticiaContract contrato) throws Exception{
             Noticia noticia = noticiaService.Save(ContractToModel.toModel(contrato));
             return new ResponseEntity<>(ModelToContract.toContract(noticia), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+
     }
 
     @Operation(summary = "modificar valores de noticias",description = "modificar valores de noticias")
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> update(@PathVariable("id") long id, @RequestBody NoticiaContract contrato) {
+    public ResponseEntity<?> update(@PathVariable("id") long id, @RequestBody NoticiaContract contrato) throws Exception {
         Optional<Noticia> noticia = noticiaService.findById(id);
 
         if (noticia.isPresent()) {
@@ -100,13 +87,8 @@ public class NoticiaController {
 
     @Operation(summary = "eliminar noticias",description = "eliminar noticias")
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<HttpStatus> delete(@PathVariable("id") long id) {
-        try {
+    public void delete(@PathVariable("id") long id) {
             noticiaService.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 
 }
